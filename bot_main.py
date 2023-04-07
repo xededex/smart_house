@@ -1,7 +1,7 @@
 import asyncio
 
 from aiogram import Bot, Dispatcher
-from config_data.config import Config, load_config
+from config_data.config import Config, command_handlers, load_config
 from handlers import auth_handlers,  reg_handlers
 
 # Функция конфигурирования и запуска бота
@@ -16,7 +16,7 @@ async def main() -> None:
     reg_handlers.init(bot)
     auth_handlers.init(bot)
     dp.include_router(auth_handlers.router)
-    # dp.include_router(command_handlers.router)
+    dp.include_router(command_handlers.router)
     dp.include_router(reg_handlers.router)
 
     

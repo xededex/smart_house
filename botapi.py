@@ -4,7 +4,7 @@ from aiogram.types import Message
 import os
 import asyncio
 import multiprocessing
-import serialworker
+import tb_bot_template.comport_driver.serialworker as serialworker
 import time
 import threading
 from config_data.config import load_config

@@ -23,7 +23,6 @@ adm_ids = config.tg_bot.admin_ids
 
 
 print('test2')
-router.message.filter(F.from_user.id.in_(adm_ids))
 
 
 button_1: KeyboardButton = KeyboardButton(text='Добавить пользователя')
@@ -39,6 +38,7 @@ keyboard_admin: ReplyKeyboardMarkup = ReplyKeyboardMarkup(
                                     keyboard=[[button_1, button_2, button_3, button_4]])
 
 
+router.message.filter(F.from_user.id.in_(adm_ids))
 
 # Этот хэндлер срабатывает на команду /start
 @router.message(CommandStart())
@@ -56,20 +56,38 @@ async def approve_reg(message: Message):
         await message.answer(text='Что-то пошло не так, но мы уже взяли деньги и пропали', reply_markup=keyboard_admin, resize_keyboard=True)
     else:
         await bot.send_message(obj.user_id, f"Ваша заявка на регистрацию одобрена. Теперь вы можете пользоваться умным домом")
-
+        print(obj.user_id)
         await message.answer(text=f'Пользователь {obj.user_name} успешно добавлен', reply_markup=keyboard_admin, resize_keyboard=True)
 
     
     print(id_reg)
     print(message.text)
+    
+    
+    
+@router.message(Text(startswith='удалить', ignore_case=True))
+async def del_us(message: Message):
+    id_user = int(message.text.split()[1])
+    
+    user_id = db.del_user(id_user)
+    if user_id == None:
+        await message.answer(text='Что-то пошло не так, но мы уже взяли деньги и пропали', reply_markup=keyboard_admin, resize_keyboard=True)
+    else:
+        await bot.send_message(user_id, f"Вы удалены из системы. Теперь вы не можете пользоваться умным домом")
+        # print(obj.user_id)
+        await message.answer(text=f'Пользователь {user_id} успешно удален', reply_markup=keyboard_admin, resize_keyboard=True)
+
+    
+    # print(id_reg)
+    # print(message.text)
 
 @router.message(Text(text='просмотр всех заявок на регистрацию'))
 async def show_all_registr_appl(message: Message):
     
     appl_regs = db.show_all_app_registration()
-    print(appl_regs)
     ans: list[str] = [f'Заявка {reg["id"]}, user_id : {reg["user_id"]}, user_name : {reg["user_name"]}' for reg in appl_regs]
-    print(message.text)
+    if len(ans) == 0:
+        ans = ["Заявок в системе нету"]
     
     
     await message.answer(text='\n'.join(ans))
@@ -91,8 +109,12 @@ async def show_all_users(message: Message):
    
 
     users = db.show_all_users()
-    ans: list[str] = [f'Пользователь {user["id"]}, user_id : {user["user_id"]}, user_name : {user["user_name"]}' for user in users]
-
+    if users == None:
+        ans = ["Пусто"]
+    
+    else:
+        ans: list[str] = [f'Пользователь {user["id"]}, user_id : {user["user_id"]}, user_name : {user["user_name"]}' for user in users]
+   
 
     keyboard_admin: ReplyKeyboardMarkup = ReplyKeyboardMarkup(
                                     keyboard=[[button_1, button_2, button_3]])

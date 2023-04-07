@@ -83,17 +83,47 @@ class DB_API:
         
             print(app_reg.user_id)
             print(app_reg.user_name)
-        
-            AuthorizedUsers.create(user_name = app_reg.user_name, user_id = app_reg.user_id)
+            if not self.is_registered(app_reg.user_id):
+                AuthorizedUsers.create(user_name = app_reg.user_name, user_id = app_reg.user_id)
+            
         except Exception as e:
             return None
         else:
             return app_reg
     
+    
+    
+    
+    def del_user(self, id : str) -> ApplicationsRegistration | None:
+        try:
+            app_reg = AuthorizedUsers.get(AuthorizedUsers.id == id)
+            AuthorizedUsers.delete_by_id(AuthorizedUsers.id)
+        except Exception as e:
+            return None
+        else:
+            return app_reg.user_id
+        
+            # print(app_reg.user_id)
+            # print(app_reg.user_name)
+            # if not self.is_registered(app_reg.user_id):
+            #     AuthorizedUsers.create(user_name = app_reg.user_name, user_id = app_reg.user_id)
+            
+
+    
+    
+    
+    
+    
     def show_all_users(self) -> list[AuthorizedUsers]:
         
         cur_query = AuthorizedUsers.select()
-        return list(cur_query.dicts().execute())
+        lst = list(cur_query.dicts().execute())
+        if len(lst) == 0:
+            return None
+        else:
+            return lst
+             
+    
     
     
     def is_registered(self, id: int) -> bool:

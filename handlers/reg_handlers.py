@@ -33,8 +33,10 @@ keyboard: ReplyKeyboardMarkup = ReplyKeyboardMarkup(
 # def is_registered_and_not_adm(message: Message) -> bool:
 #     return db.is_registered(message.from_user.id)
 
-print('test2')
-router.message.filter(lambda x : not (x.from_user.id == ADMIN_IDS and db.is_registered(x.from_user.id)))
+
+adm_ids = config.tg_bot.admin_ids
+
+router.message.filter(lambda x : not (x.from_user.id in adm_ids) and not (db.is_registered(x.from_user.id)))
 
 
 

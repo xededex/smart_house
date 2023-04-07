@@ -76,15 +76,19 @@ class ComPort():
     
     
     def listen_warning(self):
-        dd = self.sp.inWaiting()
-        
-        # print(dd)
-        if (dd > 2):
-            print("check")
-            data = self.sp.readline().decode('utf-8')
-            comm = data.split(',')
-            if comm[0] == "warning":
-                print("Warning")
+        while True:
+            time.sleep(0.5)
+            print("listen_warn")
+            if self.sp != None:
+                dd = self.sp.inWaiting()
+                
+                # print(dd)
+                if (dd > 2):
+                    print("check")
+                    data = self.sp.readline().decode('utf-8')
+                    comm = data.split(',')
+                    if comm[0] == "warning":
+                        print("Warning")
             
                 
             
@@ -100,11 +104,12 @@ class ComPort():
         self.input_queque = input_queque
         self.output_queque = output_queque
         self.arduino_port_init = False
-        
+        self.sp = None
         thread = threading.Thread(target=self.tryInit, args=())
+        thread2 = threading.Thread(target=self.listen_warning, args=())
+
         thread.start()
-        thread.join()
-                
+        thread2.start()  
         print(self.arduino_port_init)
         
 
