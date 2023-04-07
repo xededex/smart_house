@@ -21,10 +21,10 @@ class ComPort():
             # print(dd)
             if (dd > 2):
                 print("check")
-                self.lock.acquire()
+                # self.lock.acquire()
 
                 data = self.sp.readline().decode('utf-8')
-                self.lock.release()
+                # self.lock.release()
                 print(data)
                 return data
 
@@ -57,6 +57,8 @@ class ComPort():
                 self.sp = serial.Serial(dev, self.SERIAL_BAUDRATE, timeout=1)
                 self.sp.flushInput()
                 self.arduino_port_init = True
+                
+                print("succes")
                 break
                    
     
@@ -106,10 +108,10 @@ class ComPort():
         self.arduino_port_init = False
         self.sp = None
         thread = threading.Thread(target=self.tryInit, args=())
-        thread2 = threading.Thread(target=self.listen_warning, args=())
+        # thread2 = threading.Thread(target=self.listen_warning, args=())
 
         thread.start()
-        thread2.start()  
+        # thread2.start()  
         print(self.arduino_port_init)
         
 

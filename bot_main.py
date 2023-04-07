@@ -1,8 +1,8 @@
 import asyncio
 
 from aiogram import Bot, Dispatcher
-from config_data.config import Config, command_handlers, load_config
-from handlers import auth_handlers,  reg_handlers
+from config_data.config import Config,  load_config
+from handlers import auth_handlers, command_handlers,  reg_handlers
 
 # Функция конфигурирования и запуска бота
 async def main() -> None:

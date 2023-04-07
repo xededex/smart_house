@@ -28,10 +28,10 @@ cp = comport_driver.serialworker.ComPort(input_queue, output_queue)
 adm_ids = config.tg_bot.admin_ids
 
 button_1: KeyboardButton = KeyboardButton(text='все устройства')
-button_2: KeyboardButton = KeyboardButton(text='устройство')
+# button_2: KeyboardButton = KeyboardButton(text='устройство')
 button_3: KeyboardButton = KeyboardButton(text='дым')
-button_4: KeyboardButton = KeyboardButton(text='уровень воды')
-button_5: KeyboardButton = KeyboardButton(text='стат')
+# button_4: KeyboardButton = KeyboardButton(text='уровень воды')
+# button_5: KeyboardButton = KeyboardButton(text='стат')
 button_6: KeyboardButton = KeyboardButton(text='все показатели')
 
 
@@ -40,7 +40,7 @@ button_6: KeyboardButton = KeyboardButton(text='все показатели')
 
 
 keyboard: ReplyKeyboardMarkup = ReplyKeyboardMarkup(
-                                    keyboard=[[button_1, button_2, button_3, button_4, button_5, button_6]])
+                                    keyboard=[[button_1],  [button_3], [button_6]])
 
 router.message.filter(lambda x : not (x.from_user.id in adm_ids) and db.is_registered(x.from_user.id))
 
@@ -64,6 +64,33 @@ async def search_all_controllers(message: Message):
     
 
 
+
+
+@router.message(Text(text='все показатели'))
+async def all_info(message: Message):
+    print("water_lvl test")
+    data = json.loads(await cp.request("all, "))
+    dt = f"Газ : {'Есть' if data['gas'] == 0 else 'Нет'}\nCO2 - {data['smoke']}\nТемпература : {data['temp']}°C \nВлажность : {data['hum']}% \nУровень воды - {data['water']}\n"
+
+
+    print(data)
+    await message.answer(dt, ReplyKeyboardMarkup = keyboard, resize_keyboard=True)
+    # files = os.listdir("/dev/")
+    # contr = list(filter(lambda x : x.find("ttyUSB") != -1, files))
+    # print(contr)
+
+    # if len(contr) == 0:
+    #     await message.answer('На сервере не найдено устройств')
+    #     return
+    # await message.answer('Устройства :\n' + "\n".join(contr), ReplyKeyboardMarkup = keyboard, resize_keyboard=True)
+    
+
+
+
+
+
+
+
 @router.message(Text(text='устройство'))
 async def process_start_command(message: Message):
     data = await cp.get_stat_arduino()
@@ -76,15 +103,17 @@ async def process_start_command(message: Message):
     await message.answer(str(data), ReplyKeyboardMarkup = keyboard, resize_keyboard=True)
 
 
-@router.message(Text(text='эхо тест'))
-async def process_start_command(message: Message):
-    data = await cp.request("echo_test, ")
-    await message.answer(str(data), ReplyKeyboardMarkup = keyboard, resize_keyboard=True)
+# @router.message(Text(text='эхо тест'))
+# async def process_start_command(message: Message):
+#     data = await cp.request("echo_test, ")
+#     await message.answer(str(data), ReplyKeyboardMarkup = keyboard, resize_keyboard=True)
 
 @router.message(Text(text='уровень воды'))
-async def process_start_command(message: Message):
-    data = await cp.request("water, ")
-    await message.answer(str(data), ReplyKeyboardMarkup = keyboard, resize_keyboard=True)
+async def water_lvl(message: Message):
+    print("water_lvl test")
+    data = await cp.request("getlvlwater, ")
+    words = data.split(',')
+    await message.answer(f"Уровень воды: {words[1]} \n", ReplyKeyboardMarkup = keyboard, resize_keyboard=True)
 
 # Этот хэндлер будет срабатывать на команду "/start"
 @router.message(Text(text='стат'))

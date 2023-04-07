@@ -97,7 +97,8 @@ class DB_API:
     def del_user(self, id : str) -> ApplicationsRegistration | None:
         try:
             app_reg = AuthorizedUsers.get(AuthorizedUsers.id == id)
-            AuthorizedUsers.delete_by_id(AuthorizedUsers.id)
+            print(app_reg)
+            AuthorizedUsers.delete_by_id(app_reg.id)
         except Exception as e:
             return None
         else:
