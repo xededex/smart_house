@@ -13,6 +13,7 @@ async def main() -> None:
     # Инициализируем бот и диспетчер
     bot: Bot = Bot(token=config.tg_bot.token)
     dp: Dispatcher = Dispatcher()
+    command_handlers.init(bot)
     reg_handlers.init(bot)
     auth_handlers.init(bot)
     dp.include_router(auth_handlers.router)

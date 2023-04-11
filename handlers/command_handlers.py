@@ -18,6 +18,14 @@ from database.sqlite_api import DB_API
 import multiprocessing
 import json
 import os
+import threading
+
+
+
+bot = None
+def init(in_bot):
+    global bot
+    bot = in_bot
 
 router: Router = Router()
 config : Config = load_config()
@@ -25,6 +33,7 @@ db = DB_API()
 input_queue = multiprocessing.Queue()
 output_queue = multiprocessing.Queue()
 cp = comport_driver.serialworker.ComPort(input_queue, output_queue)
+
 adm_ids = config.tg_bot.admin_ids
 
 button_1: KeyboardButton = KeyboardButton(text='все устройства')
@@ -33,6 +42,46 @@ button_3: KeyboardButton = KeyboardButton(text='дым')
 # button_4: KeyboardButton = KeyboardButton(text='уровень воды')
 # button_5: KeyboardButton = KeyboardButton(text='стат')
 button_6: KeyboardButton = KeyboardButton(text='все показатели')
+
+import time
+class Alert_Messages:
+    all_msg = {
+        "temp"  : "Кажется, вы горите",
+        " water" : "Кажется, вы тонете",
+        "co2"   : "Кажется, вы задыхаетесь от co2",
+        "gas"   : "Кажется, вы задыхаетесь, но не от co2"
+    }
+    
+    @staticmethod 
+    def get_alert_msg(alert, user_name) -> str:
+        _, type_, val  = alert.split(',')
+        return f"Уважаемый, {user_name}, {Alert_Messages.all_msg[type_]}, Значение : {val}"
+        
+
+
+def broadcast(msg: str):
+    subscribed_user = db.show_all_users()
+    for user in subscribed_user:
+         bot.send_message(user["user_id"], Alert_Messages.get_alert_msg(msg, user["user_name"]))
+
+
+def check_warnings() -> None:
+    while True:
+        time.sleep(3)
+        
+        print("check_warnings")
+        if not output_queue.empty():
+            msg = output_queue.get()
+            broadcast(msg)
+
+
+
+        
+tr = threading.Thread(target=check_warnings, args=())
+tr.start()
+
+
+
 
 
 # button_2: KeyboardButton = KeyboardButton(text='Просмотр всех пользователей')
@@ -99,6 +148,8 @@ async def process_start_command(message: Message):
 
 @router.message(Text(text='дым'))
 async def process_start_command(message: Message):
+    
+    print("output_queque: ", output_queue.get())
     data = await cp.request("getlvlsmoke, ")
     await message.answer(str(data), ReplyKeyboardMarkup = keyboard, resize_keyboard=True)
 

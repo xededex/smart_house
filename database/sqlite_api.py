@@ -145,9 +145,12 @@ class DB_API:
     
 
 #     db = DB_API("")
-#     res = db.is_registered(32)
-#     print(db.show_all_users())
-#     print(res)
-#     # db.add_user("u")
-#     # db.show_all_users()
-#     # print("ewqwq")
+#     id_apply = db.create_app_registration("ff99x", 1021596615)
+#     db.add_user(id_apply)
+    # res = db.is_registered(32)
+    
+    # print(db.show_all_users())
+    # print(res)
+    # db.add_user("u")
+    # db.show_all_users()
+    # print("ewqwq")

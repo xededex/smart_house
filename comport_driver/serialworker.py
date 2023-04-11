@@ -3,6 +3,8 @@ import time
 import asyncio
 import os
 import threading
+import multiprocessing
+lock = threading.Lock()
 
 class ComPort():
     
@@ -12,21 +14,31 @@ class ComPort():
     PATH_TO_COM     = "/dev/"
 
     async def __task(self, msg):
-        self.sp.write((msg + "\n").encode(encoding = 'ascii'))
-        while True:
+        self.have_request = True
 
+        self.sp.write((msg + "\n").encode(encoding = 'ascii'))
+
+        
+        while True:
             await asyncio.sleep(1)
             dd = self.sp.inWaiting()
-            
-            # print(dd)
             if (dd > 2):
                 print("check")
                 # self.lock.acquire()
 
                 data = self.sp.readline().decode('utf-8')
+                print(data, "from reques")
+                
+                if data.split(',')[0] != "warning":
+                    print("from req")
+                    self.have_request = False
+                    return data
+
+                
+
+
                 # self.lock.release()
                 print(data)
-                return data
 
         
         pass    
@@ -79,18 +91,26 @@ class ComPort():
     
     def listen_warning(self):
         while True:
-            time.sleep(0.5)
-            print("listen_warn")
+            time.sleep(4)
             if self.sp != None:
+                
+                if self.have_request and not self.lock.locked():
+                    print("loc thread")
+                    self.lock.acquire()
+                elif not self.have_request and self.lock.locked():
+                    print("release thread")
+                    self.lock.release()
+
                 dd = self.sp.inWaiting()
                 
-                # print(dd)
                 if (dd > 2):
-                    print("check")
                     data = self.sp.readline().decode('utf-8')
-                    comm = data.split(',')
-                    if comm[0] == "warning":
-                        print("Warning")
+                    print(data)
+                    self.output_queque.put(data)
+                    # comm = data.split(',')[0]
+                    
+                    # if comm == "warning":
+                    #     print("Warning тест")
             
                 
             
@@ -102,16 +122,19 @@ class ComPort():
             
             
     
-    def __init__(self, input_queque, output_queque) -> None:
-        self.input_queque = input_queque
-        self.output_queque = output_queque
+    def __init__(self, input_queque: multiprocessing.Queue, output_queque: multiprocessing.Queue()) -> None:
+        self.input_queque:  multiprocessing.Queue() = input_queque
+        self.output_queque: multiprocessing.Queue() = output_queque
         self.arduino_port_init = False
         self.sp = None
-        thread = threading.Thread(target=self.tryInit, args=())
-        # thread2 = threading.Thread(target=self.listen_warning, args=())
+        self.have_request = False
+        self.lock = threading.Lock()
+
+        thread  = threading.Thread(target=self.tryInit, args=())
+        thread2 = threading.Thread(target=self.listen_warning, args=())
 
         thread.start()
-        # thread2.start()  
+        thread2.start()  
         print(self.arduino_port_init)
         
 
@@ -135,8 +158,11 @@ class ComPort():
     async def request(self, msg, type = "GET"):
         # resp = await asyncio.gather(self.__task())
         # self.sp.write("statinit, \n".encode(encoding = 'ascii'))
+        
+       
         resp = await asyncio.gather(self.__task(msg))
-
+    
+        
         return resp[0]
         # return  asyncio.create_task(self.__task())
         
