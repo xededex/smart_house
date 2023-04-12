@@ -94,12 +94,12 @@ class ComPort():
             time.sleep(4)
             if self.sp != None:
                 
-                if self.have_request and not self.lock.locked():
-                    print("loc thread")
-                    self.lock.acquire()
-                elif not self.have_request and self.lock.locked():
-                    print("release thread")
-                    self.lock.release()
+                # if self.have_request and not self.lock.locked():
+                #     print("loc thread")
+                #     self.lock.acquire()
+                # elif not self.have_request and self.lock.locked():
+                #     print("release thread")
+                #     self.lock.release()
 
                 dd = self.sp.inWaiting()
                 
