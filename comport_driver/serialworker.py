@@ -1,9 +1,12 @@
+import datetime
 import serial
 import time
 import asyncio
 import os
 import threading
 import multiprocessing
+from datetime import datetime
+
 lock = threading.Lock()
 
 class ComPort():
@@ -65,8 +68,8 @@ class ComPort():
                             
                 # dev = self.PATH_TO_COM + contr[0]
                 self.ports = list(map(lambda x : self.PATH_TO_COM + contr[0] + x, contr))
-                dev     = self.PATH_TO_COM + contr[0]
-                self.sp = serial.Serial(dev, self.SERIAL_BAUDRATE, timeout=1)
+                self.dev     = self.PATH_TO_COM + contr[0]
+                self.sp = serial.Serial(self.dev, self.SERIAL_BAUDRATE, timeout=1)
                 self.sp.flushInput()
                 self.arduino_port_init = True
                 
@@ -94,17 +97,19 @@ class ComPort():
             time.sleep(4)
             if self.sp != None:
                 
-                # if self.have_request and not self.lock.locked():
-                #     print("loc thread")
-                #     self.lock.acquire()
-                # elif not self.have_request and self.lock.locked():
-                #     print("release thread")
-                #     self.lock.release()
+                if self.have_request and not self.lock.locked():
+                    print("loc thread")
+                    self.lock.acquire()
+                elif not self.have_request and self.lock.locked():
+                    print("release thread")
+                    self.lock.release()
 
                 dd = self.sp.inWaiting()
                 
                 if (dd > 2):
                     data = self.sp.readline().decode('utf-8')
+                    current_datetime = datetime.now()
+                    data = f"{data}, {self.dev}, {current_datetime}s"
                     print(data)
                     self.output_queque.put(data)
                     # comm = data.split(',')[0]

@@ -30,7 +30,10 @@ class Alert_Messages:
     
     @staticmethod 
     def get_alert_msg(alert, user_name) -> str:
-        _, type_, val  = alert.split(', ')
+        _, type_, val, from_, time  = alert.split(', ')
+        
+        
+        
         return f"Уважаемый, {user_name}, {Alert_Messages.all_msg[type_]}, Значение : {val}"
         
 
@@ -41,13 +44,40 @@ async def broadcast(msg: str):
         await bot.send_message(user["user_id"], Alert_Messages.get_alert_msg(msg, user["user_name"]))
 
 
+
+
+DIFF = 3
+
+
+counter = {
+    "co2"   : 0,
+    "water" : 0,
+    "temp"  : 0,
+    "gas"   : 0,
+}
+def is_alert(type):
+    global counter
+    print(counter)
+    if counter[type] >= DIFF:
+        counter[type] = 0
+        return True
+    else:
+        counter[type] += 1
+        return False
+    
+
 async def check_warnings() -> None:
         # await asyncio.sleep(10)
         
     print("check_warnings")
-    print(bot)
+    # print(bot)
     if not output_queue.empty():
         msg = output_queue.get()
+        print(msg)
+        _, type_, val, from_, time  = msg.split(', ')
+        # db.add_history(type = type_, from_= from_, time = time)
+        print("broadcast")
+        # if is_alert(type_):        
         await broadcast(msg)
 
 

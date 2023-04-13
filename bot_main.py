@@ -42,7 +42,7 @@ async def main() -> None:
 
     scheduler = AsyncIOScheduler()
     
-    scheduler.add_job(check_warnings, "interval", seconds=5, args=())
+    scheduler.add_job(check_warnings, "interval", seconds=3, args=())
     scheduler.start()
 
     # loop = asyncio.get_event_loop()

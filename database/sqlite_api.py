@@ -16,6 +16,14 @@ class BaseModel(Model):
     class Meta:
         database = conn  # соединение с базой, из шаблона выше
 
+
+class WarningsHistory(BaseModel):
+    id     = AutoField(column_name='id')
+    device = TextField(column_name="device", null=True)
+    type_warn = TextField(column_name="type_warn", null=True)
+    time  = TextField(column_name="time", null=True)
+    
+    
 # Определяем модель исполнителя
 class AuthorizedUsers(BaseModel):
     id        = AutoField(column_name='id')
@@ -46,7 +54,7 @@ class DB_API:
         'cache_size': -1024 * 64})
 
     with conn:
-        conn.create_tables([AuthorizedUsers, ApplicationsRegistration])
+        conn.create_tables([AuthorizedUsers, ApplicationsRegistration, WarningsHistory])
 
     
     
@@ -60,6 +68,16 @@ class DB_API:
             return appl.id
     
     
+    def add_history(self, type, from_, time):
+        WarningsHistory.create(device = from_, type_warn = type, time = time)
+
+    def show_history(self):
+        cur_query = WarningsHistory.select()
+        lst = list(cur_query.dicts().execute())
+        if len(lst) == 0:
+            return None
+        else:
+            return lst[: 5]
     
     def create_app_registration(self, user_name, user_id) -> None:
         if self.already_have_appl(user_id) == None:

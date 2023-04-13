@@ -40,6 +40,8 @@ adm_ids = config.tg_bot.admin_ids
 button_1: KeyboardButton = KeyboardButton(text='все устройства')
 # button_2: KeyboardButton = KeyboardButton(text='устройство')
 button_3: KeyboardButton = KeyboardButton(text='дым')
+button_4: KeyboardButton = KeyboardButton(text='история')
+
 # button_4: KeyboardButton = KeyboardButton(text='уровень воды')
 # button_5: KeyboardButton = KeyboardButton(text='стат')
 button_6: KeyboardButton = KeyboardButton(text='все показатели')
@@ -56,7 +58,7 @@ button_6: KeyboardButton = KeyboardButton(text='все показатели')
 
 
 keyboard: ReplyKeyboardMarkup = ReplyKeyboardMarkup(
-                                    keyboard=[[button_1],  [button_3], [button_6]])
+                                    keyboard=[[button_1],  [button_3], [button_4], [button_6]])
 
 router.message.filter(lambda x : not (x.from_user.id in adm_ids) and db.is_registered(x.from_user.id))
 
@@ -103,6 +105,18 @@ async def all_info(message: Message):
 
 
 
+
+
+@router.message(Text(text='история'))
+async def get_all_history(message: Message):
+
+    history = db.show_history()
+    if len(history) > 0:
+        
+        msg = "\n".join(f"Тип :{i['type_warn']}, Устройство: {i['device']}, Время {i['time']}" for i in history)
+        await message.answer(str(msg), ReplyKeyboardMarkup = keyboard, resize_keyboard=True)
+
+        
 
 
 
